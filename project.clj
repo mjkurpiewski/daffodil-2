@@ -3,6 +3,5 @@
   :url "http://orbistertius.xyz"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.7.0"]]
-  :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
-                                   :creds :gpg}})
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [net.mikera/core.matrix "0.40.0" :exclusions [org.clojure/clojure]]])

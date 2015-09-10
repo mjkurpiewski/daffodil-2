@@ -1,8 +1,9 @@
 (ns projecteuler.problem3
+  (:require [clojure.core.matrix :as m])
   (:import (java.lang Math)))
 
 ;; The prime factors of 13195 are 5, 7, 13 and 29.
-;; What is the largest prime factor of the number 00851475143?
+;; What is the largest prime factor of the number 600851475143?
 
 (defn b-smooth?
   "A function, that when given some random integer z, the integer n (which we
@@ -56,7 +57,11 @@
   will return a smaller vector, proportional to the size of the factor base, which
   contains the coefficients of each prime number in the factor base in ascending
   order with respect to the factor base.
+
   Example: [7 5 5 3 2 2 2 2] will be reduced to [4 1 2 1]
+           For factorizations that lack factors that are in the factor base, nil
+           is replaced with 0, so that [7 5 3 2 2] with a factor base of [2 3 5 7 11]
+           will return a coefficient vector of [2 1 1 1 0].
 
   Input <- v, a vector of prime numbers to be operated on.
            factor-base, the vector of prime factors used in finding smooth numbers.
@@ -70,7 +75,9 @@
       coefficient-vec
       (recur frequency-map
              (rest base)
-             (conj coefficient-vec (frequency-map (first base)))))))
+             (conj coefficient-vec (get frequency-map
+                                        (first base)
+                                        0))))))
 
 (defn naive-sieve
   "A simple, lazy implementation of a prime sieve, in part cribbed from the official
@@ -78,6 +85,7 @@
   small, the fact that this is a naive, somewhat inefficient implementation should
   not have too much of an effect. Plus, generation of the factor set only occurs
   once per call of dixon-factorization.
+
   Input <- s, a sequence of integers, usually starting from 2.
   Output -> A lazy sequence of primes, from which we can take what we need,
             usually only up to double-digit prime numbers."
@@ -107,6 +115,7 @@
   random-in-range. These may be very bad random numbers, because I am generating
   them using a rand function that operates on doubles, and then casting the result
   to a long. They look pretty random and reasonable, but...
+
   Input <- x, an integer or long defining the lower bound of the range (exclusive)
            y, an integer or long defining the upper bound of the range (exclusive)
   Output -> A random long that hopefully falls within the range specified and is
@@ -126,6 +135,14 @@
   Output -> p, an integer, the largest prime factor of n."
   [n]
   (let [factor-base (generate-primes-to (optimal-b-value n))
-        b-smooth-factorizations {}]
-    ))
-
+        b-smooth-factorizations {}
+        desired-smooths (+ (count factor-base) (Math/floor (/ (count factor-base) 3)))]
+    (while (< (count b-smooth-factorizations)
+              desired-smooths)
+      (let [z (random-in-range (Math/ceil (Math/sqrt n))
+                               n),
+            smooth-number (b-smooth? z n factor-base)]
+        (if smooth-number
+          (assoc b-smooth-factorizations z smooth-number))))
+    b-smooth-factorizations))
+;; BROKEN, DOES NOT TERMINATE!!!!
