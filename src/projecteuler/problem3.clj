@@ -50,6 +50,28 @@
   (Math/ceil (Math/exp (Math/sqrt (* (Math/log10 n)
                                      (Math/log10 (Math/log10 n)))))))
 
+(defn reduce-to-coefficients
+  "reduce-to-coefficients will take as input a non-false result from b-smooth?
+  i.e. a vector of prime numbers in decreasing order. From this input, the function
+  will return a smaller vector, proportional to the size of the factor base, which
+  contains the coefficients of each prime number in the factor base in ascending
+  order with respect to the factor base.
+  Example: [7 5 5 3 2 2 2 2] will be reduced to [4 1 2 1]
+
+  Input <- v, a vector of prime numbers to be operated on.
+           factor-base, the vector of prime factors used in finding smooth numbers.
+  Output -> A vector consisting of the coefficients of prime numbers, in ascending
+            order with respect to the primes."
+  [v factor-base]
+  (loop [frequency-map (frequencies (rseq v)),
+         base factor-base,
+         coefficient-vec '[]]
+    (if (empty? base)
+      coefficient-vec
+      (recur frequency-map
+             (rest base)
+             (conj coefficient-vec (frequency-map (first base)))))))
+
 (defn naive-sieve
   "A simple, lazy implementation of a prime sieve, in part cribbed from the official
   Clojure documentation for lazy-seqs. Given that factor bases will generally be quite
