@@ -5,51 +5,20 @@
 ;; The prime factors of 13195 are 5, 7, 13 and 29.
 ;; What is the largest prime factor of the number 600851475143?
 
-(defn b-smooth?
-  "A function, that when given some random integer z, the integer n (which we
-  wish to factor,) and the appropriately sized factor base for n factor-base,
-  will determine whether or not the square of z is B-smooth with respect to the
-  integer to be factorized and the factor base.
+(defn- debug-smooth
+  "I put this in a separate function becuase it seems I rely on this a bit. It
+  takes as input the whatever the current state of a factorization is, the number
+  being reduced by division of prime factors, and the facts that have been removed
+  from the target value 
 
-  Input <- z, an integer, randomly chosen by dixon-factorization,
-           n, the integer to be factorized. Participates in the relationship
-              (z^2 mod n), the result of which is checked for B-smoothness,
-           factor-base, a vector of integers constituting the factor base.
-  Output -> Either a vector representing the expanded prime factorization of
-            the value of (z^2 mod n) or false if there is no B-smooth
-            factorization with respect to the factor base."
-  [z n factor-base]
-  (let [z2-mod-n (long (mod (* z z) n))]
-    (loop [factorization '[]
-           to-reduce z2-mod-n
-           factors (into [] (rseq factor-base))]
-
-      ;; Debug output
-      (println "Factorization: " factorization ", to-reduce: " to-reduce ", factors: " factors)
-      ;; End debug output
-
-      (cond
-        (= to-reduce 1) factorization
-        (nil? (peek factors)) false
-        :else
-        (if (= (mod to-reduce (first factors)) 0)
-          (recur (conj factorization (first factors))
-                 (/ to-reduce (first factors))
-                 factors)
-          (recur factorization
-                 to-reduce
-                 (into [] (rest factors))))))))
-
-(defn optimal-b-value
-  "Given an integer, n, this function will employ the relation exp(sqrt(log n log log n))
-  to come up with an ideal, optimized B-value to define the factor base to be used in
-  determining the B-smoothness of a candidate z value.
-
-  Input <- n, an integer, or long, potentially very large.
-  Output -> An integer, ceil'd from the floating point result of the calculation"
-  [n]
-  (Math/ceil (Math/exp (Math/sqrt (* (Math/log10 n)
-                                     (Math/log10 (Math/log10 n)))))))
+  Input <- factorization [a vector],
+           to-reduce, an integer,
+           factors [a vector]
+  Output -> (Side effects, println)"
+  [factorization to-reduce factors]
+  (println "Factorization: " factorization,
+           ", to-reduce: " to-reduce,
+           ", factors:" factors))
 
 (defn reduce-to-coefficients
   "reduce-to-coefficients will take as input a non-false result from b-smooth?
@@ -78,6 +47,53 @@
              (conj coefficient-vec (get frequency-map
                                         (first base)
                                         0))))))
+
+(defn b-smooth?
+  "A function, that when given some random integer z, the integer n (which we
+  wish to factor,) and the appropriately sized factor base for n factor-base,
+  will determine whether or not the square of z is B-smooth with respect to the
+  integer to be factorized and the factor base.
+
+  Input <- z, an integer, randomly chosen by dixon-factorization,
+           n, the integer to be factorized. Participates in the relationship
+              (z^2 mod n), the result of which is checked for B-smoothness,
+           factor-base, a vector of integers constituting the factor base.
+  Output -> Either a vector representing the expanded prime factorization of
+            the value of (z^2 mod n) or false if there is no B-smooth
+            factorization with respect to the factor base."
+  [z n factor-base]
+  (let [z2 (Math/pow z 2.0)
+        z2-mod-n (long (mod z2 n))]
+    (loop [factorization '[]
+           to-reduce z2-mod-n
+           factors (into [] (rseq factor-base))]
+
+      ;; Debug output
+      ;; (debug-smooth factorization to-reduce factors)
+      ;; End debug output
+
+      (cond
+        (= to-reduce 1) #spy/p (reduce-to-coefficients factorization factor-base)
+        (nil? (peek factors)) false
+        :else
+        (if (= (mod to-reduce (first factors)) 0)
+          (recur (conj factorization (first factors))
+                 (/ to-reduce (first factors))
+                 factors)
+          (recur factorization
+                 to-reduce
+                 (into [] (rest factors))))))))
+
+(defn optimal-b-value
+  "Given an integer, n, this function will employ the relation exp(sqrt(log n log log n))
+  to come up with an ideal, optimized B-value to define the factor base to be used in
+  determining the B-smoothness of a candidate z value.
+
+  Input <- n, an integer, or long, potentially very large.
+  Output -> An integer, ceil'd from the floating point result of the calculation"
+  [n]
+  (Math/ceil (Math/exp (Math/sqrt (* (Math/log10 n)
+                                     (Math/log10 (Math/log10 n)))))))
 
 (defn naive-sieve
   "A simple, lazy implementation of a prime sieve, in part cribbed from the official
@@ -135,14 +151,19 @@
   Output -> p, an integer, the largest prime factor of n."
   [n]
   (let [factor-base (generate-primes-to (optimal-b-value n))
-        b-smooth-factorizations {}
-        desired-smooths (+ (count factor-base) (Math/floor (/ (count factor-base) 3)))]
-    (while (< (count b-smooth-factorizations)
-              desired-smooths)
-      (let [z (random-in-range (Math/ceil (Math/sqrt n))
-                               n),
-            smooth-number (b-smooth? z n factor-base)]
-        (if smooth-number
-          (assoc b-smooth-factorizations z smooth-number))))
-    b-smooth-factorizations))
-;; BROKEN, DOES NOT TERMINATE!!!!
+        desired-smooths (int (+ (count factor-base) (Math/floor (/ (count factor-base) 3))))]
+    (loop [b-smooth-factorizations {}
+           z (random-in-range (Math/ceil (Math/sqrt n)) n)]
+      (let [smooth-number (b-smooth? z n factor-base)]
+        (if (= (count b-smooth-factorizations) desired-smooths)
+          b-smooth-factorizations
+          (if smooth-number
+            (recur #spy/p (assoc b-smooth-factorizations z smooth-number)
+                   (random-in-range (Math/ceil (Math/sqrt n)) n))
+            (recur b-smooth-factorizations
+                   (random-in-range (Math/ceil (Math/sqrt n)) n))))))))
+
+
+
+
+
