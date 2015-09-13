@@ -20,6 +20,34 @@
            ", to-reduce: " to-reduce,
            ", factors:" factors))
 
+(defn even-coefficients?
+  "When applied to a vector of binary coefficients, reduces the vector by addition.
+  If the sum is 0, true is returned, because an even coefficient is denoted by 0 in our
+  vectors of binary coefficients. Therefore, any non-zero result will return false.
+
+  Input <- v, a vector of binary coefficients (even or odd coefficient values)
+  Output -> A boolean, true if reduce returns 0, false otherwise."
+  [v]
+  (if (zero? (reduce + v))
+    true
+    false))
+
+(defn reduce-to-binary-coefficients
+  "This function will take a vector, such as one produced by reduce-to-coefficients,
+  and transform it into a vector where if the coefficient is even, it is replaced with
+  a 0. If the coefficient is odd, it is replaced with a 1.
+
+  Input <- v, a vector of coefficients for the factorization of some number
+  Output -> A vector of the same length of v where each index represents whether
+            or not a value is even (0) or odd (1)."
+  [v]
+  (into []
+        (map (fn [i]
+                  (if (even? i)
+                    0
+                    1))
+                v)))
+
 (defn reduce-to-coefficients
   "reduce-to-coefficients will take as input a non-false result from b-smooth?
   i.e. a vector of prime numbers in decreasing order. From this input, the function
