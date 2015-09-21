@@ -1,20 +1,12 @@
 (ns projecteuler.problem3
+  (:require [clojure.set :as s])
   (:require [clojure.core.matrix :as m])
+  (:require [incanter.core :refer :all :as incanter])
+  (:use [projecteuler.libs.numbertheory :as nt])
   (:import (java.lang Math)))
 
 ;; The prime factors of 13195 are 5, 7, 13 and 29.
 ;; What is the largest prime factor of the number 600851475143?
-
-(defn gcd
-  "Basic recursive solution to finding the greatest common divisor of two numbers using
-  Euclid's method.
-
-  Input <- a and b, two integers.
-  Output -> A non-zero integer that is the greatest common divisor."
-  [a b]
-  (if (zero? b)
-    a
-    (recur b (mod a b))))
 
 (defn- debug-smooth
   "I put this in a separate function becuase it seems I rely on this a bit. It
@@ -25,6 +17,7 @@
   Input <- factorization [a vector],
            to-reduce, an integer,
            factors [a vector]
+
   Output -> (Side effects, println)"
   [factorization to-reduce factors]
   (println "Factorization: " factorization,
@@ -37,6 +30,7 @@
   vectors of binary coefficients. Therefore, any non-zero result will return false.
 
   Input <- v, a vector of binary coefficients (even or odd coefficient values)
+
   Output -> A boolean, true if reduce returns 0, false otherwise."
   [v]
   (if (zero? (reduce + v))
@@ -49,15 +43,16 @@
   a 0. If the coefficient is odd, it is replaced with a 1.
 
   Input <- v, a vector of coefficients for the factorization of some number
+
   Output -> A vector of the same length of v where each index represents whether
             or not a value is even (0) or odd (1)."
   [v]
   (into []
         (map (fn [i]
-                  (if (even? i)
-                    0
-                    1))
-                v)))
+               (if (even? i)
+                 0
+                 1))
+             v)))
 
 (defn reduce-to-coefficients
   "reduce-to-coefficients will take as input a non-false result from b-smooth?
@@ -73,6 +68,7 @@
 
   Input <- v, a vector of prime numbers to be operated on.
            factor-base, the vector of prime factors used in finding smooth numbers.
+
   Output -> A vector consisting of the coefficients of prime numbers, in ascending
             order with respect to the primes."
   [v factor-base]
@@ -97,6 +93,7 @@
            n, the integer to be factorized. Participates in the relationship
               (z^2 mod n), the result of which is checked for B-smoothness,
            factor-base, a vector of integers constituting the factor base.
+
   Output -> Either a vector representing the expanded prime factorization of
             the value of (z^2 mod n) or false if there is no B-smooth
             factorization with respect to the factor base."
@@ -112,8 +109,12 @@
       ;; End debug output
 
       (cond
-        (= to-reduce 1) #spy/p (reduce-to-coefficients factorization factor-base)
-        (nil? (peek factors)) false
+        (= to-reduce 1)
+        (reduce-to-coefficients factorization factor-base),
+
+        (nil? (peek factors))
+        false,
+
         :else
         (if (= (mod to-reduce (first factors)) 0)
           (recur (conj factorization (first factors))
@@ -129,54 +130,11 @@
   determining the B-smoothness of a candidate z value.
 
   Input <- n, an integer, or long, potentially very large.
+
   Output -> An integer, ceil'd from the floating point result of the calculation"
   [n]
   (Math/ceil (Math/exp (Math/sqrt (* (Math/log10 n)
                                      (Math/log10 (Math/log10 n)))))))
-
-(defn naive-sieve
-  "A simple, lazy implementation of a prime sieve, in part cribbed from the official
-  Clojure documentation for lazy-seqs. Given that factor bases will generally be quite
-  small, the fact that this is a naive, somewhat inefficient implementation should
-  not have too much of an effect. Plus, generation of the factor set only occurs
-  once per call of dixon-factorization.
-
-  Input <- s, a sequence of integers, usually starting from 2.
-  Output -> A lazy sequence of primes, from which we can take what we need,
-            usually only up to double-digit prime numbers."
-  [s]
-  (cons (first s)
-        (lazy-seq (naive-sieve (filter (fn [n]
-                                         (not= (mod n (first s))
-                                               0))
-                                       (rest s))))))
-
-(defn generate-primes-to
-  "Given an input n, this function will generate a sequence of primes up to
-  and potentially including n.
-
-  Input <- n, an integer, potentially prime.
-  Output -> A sequence of prime numbers up to and potentially including n."
-  [n]
-  (loop [factor-base '[]
-         prime-generator (naive-sieve (iterate inc 2))]
-    (if (> (first prime-generator) n)
-      factor-base
-      (recur (conj factor-base (first prime-generator))
-             (drop 1 prime-generator)))))
-
-(defn random-in-range
-  "Generates a random number within the range specified by the arguments to
-  random-in-range. These may be very bad random numbers, because I am generating
-  them using a rand function that operates on doubles, and then casting the result
-  to a long. They look pretty random and reasonable, but...
-
-  Input <- x, an integer or long defining the lower bound of the range (exclusive)
-           y, an integer or long defining the upper bound of the range (exclusive)
-  Output -> A random long that hopefully falls within the range specified and is
-            sufficiently random for our purposes. *crosses fingers*"
-  [x y]
-  (long (+ x (rand (- y x)))))
 
 (defn generate-b-smooths
   "Given a value of n, will compute an optimal B-value, the associated
@@ -187,6 +145,7 @@
   to generate the small prime factorizations, mapped to those factorizations.
 
   Input <- n, the integer to be factorized.
+
   Ouput -> smooth-factorizations, a map where the keys are the z values and
            the vals are coefficient vectors that satisfy the relation z^2 mod n
            with respect to the factor base generated by the function. This may
@@ -194,27 +153,30 @@
            upon a relation whose b-smooth factorization consists only of even
            exponents."
   [n]
-  (let [factor-base (generate-primes-to (optimal-b-value n)),
-        desired-smooth-numbers (int (+ (count factor-base)
-                                       (Math/floor (/ (count factor-base)
-                                                      3))))]
+  (let [factor-base (nt/generate-primes-to (optimal-b-value n)),
+        desired-smooth-numbers (inc (count factor-base)),
+        constant-map {:constants {:factorbase factor-base,
+                                  :n n}}]
     (loop [smooth-factorizations {},
-           z (random-in-range (Math/ceil (Math/sqrt n)) n)]
+           smooth-counter 0,
+           z (nt/random-in-range (Math/ceil (Math/sqrt n)) n)]
       (let [maybe-smooth (b-smooth? z n factor-base)]
         (cond
           (and maybe-smooth (even-coefficients? (reduce-to-binary-coefficients maybe-smooth)))
-          (hash-map z [maybe-smooth factor-base])
+          (assoc constant-map z maybe-smooth)
 
-          (= (count smooth-factorizations) desired-smooth-numbers)
-          smooth-factorizations
+          (= smooth-counter desired-smooth-numbers)
+          (merge constant-map smooth-factorizations)
 
           maybe-smooth
           (recur (assoc smooth-factorizations z maybe-smooth)
-                 (random-in-range (Math/ceil (Math/sqrt n)) n))
+                 (inc smooth-counter)
+                 (nt/random-in-range (Math/ceil (Math/sqrt n)) n))
 
           :else
           (recur smooth-factorizations
-                 (random-in-range (Math/ceil (Math/sqrt n)) n)))))))
+                 smooth-counter
+                 (nt/random-in-range (Math/ceil (Math/sqrt n)) n)))))))
 
 (defn test-for-divisor
   "Given a relation of two squares in the form of a random z value and a
@@ -222,17 +184,109 @@
   being the factor base, will check for the existence of a non-trivial
   divisor for n i.e. not 1.
 
-  Input -> z, a randomly generated integer, created by generate-b-smooths,
-           m, a 1-d matrix where the first element is a coefficient vector
-              and the second element is the factor base."
-  [z m]
-  (let [coefficents (first m)
-        factor-base (second m)]
-    (println "z: " z ", coefficients: " coefficents ", factor base: " factor-base)
-    (reduce * (map (fn [x y]
-                     (Math/pow x y))
-                   factor-base
-                   coefficents))))
+  Input -> m, a map, comprised of a nested map of :constants consisting of them
+          :factorbase and :n value, the remaining elements of the map should being
+          a z value and its exponent vector.
+
+  Output -> A vector consisting of one or two non-trivial divisors of n,
+            or the vector [1 1]"
+  [m]
+  (let [factor-base (:factorbase (:constants m))
+        n (:n (:constants m))
+        coefficients (-> m
+                         last
+                         last)
+        a (-> m
+              last
+              first)
+        b (Math/sqrt (reduce * (map (fn [x y]
+                                      (Math/pow x y))
+                                    factor-base
+                                    coefficients)))]
+
+    (println "Congruence of squares between: " a "and" b)
+
+    [(int (nt/gcd (+ a b) n))
+     (int (nt/gcd (- a b) n))]))
+
+(defn matrix-computation
+  "Given a matrix consisting of the constants factor-base and n, will attempt to
+  find a linear dependence between the rows of coefficients and, from there,
+  locating a congruence of squares from which we can derive, hopefully, a non
+  trivial pair of factors.
+
+  Input <- m, a map, comprised of a nested map of :constants consisting of them
+          :factorbase and :n value, the remaining elements of the map should be
+          pairs of a z value and its exponent vector.
+
+  Output -> A vector consisting of one or two non-trivial divisors of n,
+            otherwise containing n and the trivial case (1)."
+  [m]
+  (let [factor-base (:factorbase (:constants m))
+        n (:n (:constants m))
+        z-values (into [] (-> m
+                              rest
+                              keys))
+        coefficients (into [] (map reduce-to-binary-coefficients
+                                   (-> m
+                                       rest
+                                       vals)))]
+    (println "Z-values: " z-values ", Coefficients: " coefficients))
+  ;; Woe is me, I am incomplete. I am undone.)
+
+(defn test-primality
+  "Provided a map produced by generate-b-smooths, will apply test-for-divisor
+  and test the returned elements for primality.
+
+  Input <- A map produced by generate-b-smooths which will contain the n value
+           we are attempting to factor, the factor base for the factorization,
+           as well as either 1 key/value pair of z and an exponent vector or
+           (inc (count factor-base)) pairs of the same.
+
+  Output -> A set of prime factors of n. These may be trivial."
+  [m]
+  (hash-set (filter integer?
+                    (map prime? (test-for-divisor m)))))
+
+(defn accumulate-primes
+  "Accumulate primes, when given an integer n, will attempt to find congruences
+  of squares by means of the function generate-b-smooths. If it finds a congruence
+  with an even coefficient vector, it will terminate its search for more b-smooth
+  relations and test to see if that value provides a prime factor of n.
+
+  If generate-b-smooths returns a map with greater than 1 z-value/coefficient
+  vector pairs, the map will be passed to matrix-computation to search for
+  prime factors. matrix-computation will return a set containing one or two
+  prime factors, should they be found. If so, they are added to the set of
+  prime factors, prime-factorization, which is the function's output.
+
+  Input <- n, an integer.
+
+  Output -> a set of all prime numbers that compose the given integer n."
+  [n]
+  (loop [to-reduce (int n),
+         prime-factorization #{}]
+
+    (if #spy/p (<= to-reduce 1)
+      prime-factorization
+
+      (let [smooth-factorization (generate-b-smooths to-reduce)]
+        (cond
+          (= (count smooth-factorization) 2)
+          (let [potential-primes (test-primality smooth-factorization)]
+            (if potential-primes
+              (recur (reduce / to-reduce potential-primes)
+                     (s/union prime-factorization potential-primes))
+              (recur to-reduce
+                     prime-factorization))),
+          :else
+          ;; (let [matrix-result (matrix-computation smooth-factorization)]
+          ;;   (if matrix-result
+          ;;     (recur (reduce / to-reduce matrix-result)
+          ;;            (s/union prime-factorization matrix-result))
+          ;;     (recur to-reduce
+          ;;            prime-factorization)))
+          nil)))))
 
 (defn dixon-factorization
   "Given a value, n, this function will attempt to locate the prime factors
@@ -243,11 +297,10 @@
   optimal-b-value, defined above.
 
   Input <- n, an integer, potentially very large.
+
   Output -> p, an integer, the largest prime factor of n."
   [n]
-  )
-
-
-
-
-
+  (loop [b-smooths (generate-b-smooths n)]
+    (if (= 1 (count (rest b-smooths)))
+      (test-for-divisor b-smooths)
+      (println "ehhhhhh"))))
