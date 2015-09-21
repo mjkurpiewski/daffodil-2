@@ -199,16 +199,18 @@
         a (-> m
               last
               first)
-        b (Math/sqrt (reduce * (map (fn [x y]
-                                      (Math/pow x y))
-                                    factor-base
-                                    coefficients)))]
+        b (Math/sqrt (reduce *
+                             (map (fn [x y]
+                                    (Math/pow x y))
+                                  factor-base
+                                  coefficients)))]
 
     (println "Congruence of squares between: " a "and" b)
 
     [(int (nt/gcd (+ a b) n))
      (int (nt/gcd (- a b) n))]))
 
+;; Woe is me, I am incomplete. I am undone
 (defn matrix-computation
   "Given a matrix consisting of the constants factor-base and n, will attempt to
   find a linear dependence between the rows of coefficients and, from there,
@@ -231,8 +233,7 @@
                                    (-> m
                                        rest
                                        vals)))]
-    (println "Z-values: " z-values ", Coefficients: " coefficients))
-  ;; Woe is me, I am incomplete. I am undone.)
+    (println "Z-values: " z-values ", Coefficients: " coefficients)))
 
 (defn test-primality
   "Provided a map produced by generate-b-smooths, will apply test-for-divisor
