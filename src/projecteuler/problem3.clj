@@ -103,7 +103,7 @@
         z2-mod-n (long (mod z2 n))]
     (loop [factorization '[]
            to-reduce z2-mod-n
-           factors (into [] (rseq factor-base))]
+           factors (vec (rseq factor-base))]
 
       ;; Debug output
       ;; (debug-smooth factorization to-reduce factors)
@@ -123,7 +123,7 @@
                  factors)
           (recur factorization
                  to-reduce
-                 (into [] (rest factors))))))))
+                 (vec (rest factors))))))))
 
 (defn optimal-b-value
   "Given an integer, n, this function will employ the relation exp(sqrt(log n log log n))
@@ -164,7 +164,9 @@
       (let [maybe-smooth (b-smooth? z n factor-base)]
         (cond
           (and maybe-smooth (even-exponents? (reduce-to-binary-exponents maybe-smooth)))
-          (assoc constant-map z maybe-smooth)
+          (assoc constant-map
+                 :even {z maybe-smooth}
+                 :odd smooth-factorizations)
 
           (= smooth-counter desired-smooth-numbers)
           (merge constant-map smooth-factorizations)
@@ -250,6 +252,21 @@
   (hash-set (filter integer?
                     (map prime? (test-for-divisor m)))))
 
+(defn collect-odds
+  "A simple map function that will collect b-smooth factorizations with odd
+  exponents and conj them to a list of vectors.
+
+  Input <- storage, a list that contains the vectors of z and the associated exponents.
+           source, a map that contains a submap of key/value pairs corresponding to z
+           values with odd exponent vectors.
+
+  Output -> a new list, containing the elements of storage, as well as those that were
+            found in source."
+  [storage source]
+  (map (fn [v]
+         (conj storage v))
+       source))
+
 (defn accumulate-primes
   "Accumulate primes, when given an integer n, will attempt to find congruences
   of squares by means of the function generate-b-smooths. If it finds a congruence
@@ -269,28 +286,26 @@
   Output -> a set of all prime numbers that compose the given integer n."
   [n]
   (loop [to-reduce (int n),
-         prime-factorization #{}]
+         prime-factorization #{}
+         odd-exponents ()]
 
-    (if #spy/p (<= to-reduce 1)
+    (if (<= to-reduce 1)
       prime-factorization
 
       (let [smooth-factorization (generate-b-smooths to-reduce)]
         (cond
-          (= (count smooth-factorization) 2)
-          (let [potential-primes (test-primality smooth-factorization)]
+          (:even smooth-factorization)
+          (let [potential-primes (test-primality (:even smooth-factorization))]
             (if potential-primes
               (recur (reduce / to-reduce potential-primes)
-                     (s/union prime-factorization potential-primes))
+                     (s/union prime-factorization potential-primes)
+                     (collect-odds odd-exponents (:odd smooth-factorization)))
               (recur to-reduce
-                     prime-factorization))),
+                     prime-factorization
+                     (collect-odds odd-exponents (:odd smooth-factorization))))),
           :else
-          ;; (let [matrix-result (matrix-computation smooth-factorization)]
-          ;;   (if matrix-result
-          ;;     (recur (reduce / to-reduce matrix-result)
-          ;;            (s/union prime-factorization matrix-result))
-          ;;     (recur to-reduce
-          ;;            prime-factorization)))
-          nil)))))
+          nil
+          )))))
 
 (defn dixon-factorization
   "Given a value, n, this function will attempt to locate the prime factors
