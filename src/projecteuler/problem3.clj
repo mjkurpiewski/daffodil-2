@@ -43,6 +43,7 @@
   a 0. If the exponent is odd, it is replaced with a 1.
 
   Input <- v, a vector of exponents for the factorization of some number
+          with respect to the factor base.
 
   Output -> A vector of the same length of v where each index represents whether
             or not a value is even (0) or odd (1)."
@@ -253,7 +254,9 @@
   "Accumulate primes, when given an integer n, will attempt to find congruences
   of squares by means of the function generate-b-smooths. If it finds a congruence
   with an even exponent vector, it will terminate its search for more b-smooth
-  relations and test to see if that value provides a prime factor of n.
+  relations and test to see if that value provides a prime factor of n. It will
+  also store the b-smooth values generated up until that point should they be needed
+  for a matrix calculation.
 
   If generate-b-smooths returns a map with greater than 1 z-value/exponent
   vector pairs, the map will be passed to matrix-computation to search for
