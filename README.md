@@ -5,6 +5,13 @@ Project Euler exercises. The current version number (i.e. 0.0.3) reflects the pr
 I am currently working. As the number increases, the tens place will occupy the second
 versioning digit. (i.e. version 0.1.1 would reflect working on exercise 11.)
 
+## Current status
+* Problem 1: Complete
+* Problem 2: Complete
+* Problem 3: "Just one more thing!" away from completion, see header comments in problem3.clj for a description of the project and its progress.
+* Problem 4: Complete
+* Problem 5: Pending
+
 ## Usage
 
 Look at the code, play with it in a REPL, try to break things, whatever your heart
