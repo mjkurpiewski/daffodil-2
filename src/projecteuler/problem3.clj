@@ -1,3 +1,20 @@
+;; This exercise began somewhat innocuously, given that finding an answer to the
+;; solution is not particularly difficult if you're interested in getting the
+;; answer rather than using it as a tool to improve your understanding of CS
+;; and mathematics. As a result, I decided to approach solving the problem by
+;; implementing Dixon's Factorization Method.
+;; In the process of writing this method, I discovered, and was able to take
+;; steps to improve, my deficiencies in linear algebra and familiarity with
+;; more data-oriented Clojure libraries. So while this program has taken some
+;; time, and I can, playing with what I have in the REPL, coax an answer from
+;; it, it still is incomplete as I've yet to find a computational method for
+;; efficiently utilizing the matrix of exponents to discern a congruence of
+;; squares candidate to test for whether or not it contributes a non-trivial
+;; factor to our factorization of some number n. Insights into LU-decomposition,
+;; whose functionality is provided by Incanter, has led me down a promising path
+;; to finding a good solution in the very near future! Stay tuned. :)
+;; -pkurpiewski 10/16/2015
+
 (ns projecteuler.problem3
   (:require [clojure.set :as s])
   (:require [clojure.core.matrix :as m])
