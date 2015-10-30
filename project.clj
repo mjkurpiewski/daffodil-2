@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-(defproject projecteuler "0.0.6-SNAPSHOT"
+(defproject projecteuler "0.0.7-SNAPSHOT"
 =======
 (defproject projecteuler "0.0.3-SNAPSHOT"
 >>>>>>> parent of 48c7436... Updated version string in project.clj, added intro/commentary to problem3.clj

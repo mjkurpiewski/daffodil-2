@@ -11,7 +11,8 @@ versioning digit. (i.e. version 0.1.1 would reflect working on exercise 11.)
 * Problem 3: "Just one more thing!" away from completion, see header comments in problem3.clj for a description of the project and its progress.
 * Problem 4: Complete
 * Problem 5: Complete
-* Problem 6: Pending
+* Problem 6: Complete
+* Problem 7: Pending
 
 ## Usage
 

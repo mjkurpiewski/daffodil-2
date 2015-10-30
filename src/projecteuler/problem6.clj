@@ -9,4 +9,16 @@
 
 (ns projecteuler.problem6)
 
+(defn find-difference
+  "Finds the difference between the sum of the squares of the first n natural
+  numbers and the square of the sum of the first n natural numbers.
 
+  Input <- n, an integer, representing the upper boundary of number range
+  Output -> the difference between the sum of squares and the square of the
+            sum, an integer"
+  [n]
+  (let [active-range (range 1 (+ n 1))]
+    (long (- (Math/pow (reduce + active-range) 2)
+             (reduce + (map (fn [e]
+                              (Math/pow e 2))
+                            active-range))))))
