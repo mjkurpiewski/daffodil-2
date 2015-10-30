@@ -1,0 +1,2 @@
+(ns projecteuler.problem6)
+

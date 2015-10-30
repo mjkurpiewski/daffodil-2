@@ -109,7 +109,7 @@
   will determine whether or not the square of z is B-smooth with respect to the
   integer to be factorized and the factor base.
 
-  Input <- z, an integer, randomly chosen by dixon-factorization,
+  Input <- z, an integer, randomly chosen by generate-b-smooths,
            n, the integer to be factorized. Participates in the relationship
               (z^2 mod n), the result of which is checked for B-smoothness,
            factor-base, a vector of integers constituting the factor base.
@@ -118,6 +118,9 @@
             the value of (z^2 mod n) or false if there is no B-smooth
             factorization with respect to the factor base."
   [z n factor-base]
+  (if (prime? z)
+    false)
+
   (let [z2 (Math/pow z 2.0)
         z2-mod-n (long (mod z2 n))]
     (loop [factorization '[]
@@ -131,7 +134,6 @@
       (cond
         (= to-reduce 1)
         (reduce-to-exponents factorization factor-base),
-
         (nil? (peek factors))
         false,
 
@@ -322,11 +324,6 @@
                                  :odd odd-exponents)
                 potential-primes (test-primality (matrix-computation oddmap))]
             (println oddmap))
-          ;; (println
-          ;;  "Size of odd-exponents: " (count odd-exponents) "\n"
-          ;;  "Class of odd-exponents: " (class odd-exponents) "\n"
-          ;;  "Constants map: " constants "\n"
-          ;;  "Odd-exponents: " odd-exponents),
 
           (nil? (:even smooth-factorization))
           (recur to-reduce

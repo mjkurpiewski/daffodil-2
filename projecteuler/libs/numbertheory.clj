@@ -56,14 +56,17 @@
   [x y]
   (long (+ x (rand (- y x)))))
 
+
+;; THIS IS BAD.
 (defn prime?
   "A function that takes an integer, n, and tests it for primality. We immediately
-  check whether or not the integer is even, then proceed to perform trial division
-  until we reach the square root of n.
+  check whether or not the integer is the oddest prime, 2, then check if n is even,
+  then proceed to perform trial division until we reach the square root of n.
 
   Input <- n, an integer, to be tested for primality.
   Output -> Mixed output, returns the prime if true, false otherwise. (THIS MAY BE POOR FORM)"
   [n]
+
   (if (even? n)
     false
     (let [square-root (int (Math/sqrt n))]
@@ -73,5 +76,3 @@
           (if (zero? (mod n i))
             false
             (recur (+ i 2))))))))
-
-
