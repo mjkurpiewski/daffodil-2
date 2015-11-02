@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 (defproject projecteuler "0.0.7-SNAPSHOT"
-=======
-(defproject projecteuler "0.0.3-SNAPSHOT"
->>>>>>> parent of 48c7436... Updated version string in project.clj, added intro/commentary to problem3.clj
   :description "Project Euler exercise problem solvers written in Clojure."
   :url "http://orbistertius.xyz"
   :license {:name "Eclipse Public License"
