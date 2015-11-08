@@ -7,7 +7,11 @@
 
 (defn trivial-prime-factorize
   "Takes as input a number and a factor base and will return a prime factorization
-  over that base."
+  over that base.
+
+  Input <- n, an integer, and factor-base, a vector of integers
+  Output -> a vector of integers corresponding to the prime factorization
+            of n, or a vector containing n if n is prime"
   [n factor-base]
   (loop [to-reduce n,
          factorization '[],
@@ -29,11 +33,27 @@
                (vec (rest factors)))))))
 
 (defn assemble-prime-factorizations
+  "For some values of m and n, constituting an inclusive range of numbers, and
+  a factor-base composed of a vector of integers, returns a sequence of integer
+  vectors for the prime factorizations of the numbers or the number itself, if
+  prime.
+
+  Input <- m and n, integers constituting an inclusive range, and factor-base,
+           a vector of integers
+  Output -> A sequence of integer vectors"
   [m n factor-base]
   (for [x (range m (+ n 1))]
     (trivial-prime-factorize x factor-base)))
 
 (defn generate-basis
+  "For a value n, generates a full factor base, consisting of a vector of primes
+  up to and including n, as well a trial base half the size of n. Both of these
+  integer vectors are returned in a map, keyed by :factor-base or :trial-base.
+
+  Input <- n, an integer, which establishes an upper boundary on the elements of
+           the factor base
+  Output -> a map, with keys :factor-base and :trial-base, which return values of
+            of integer vectors"
   [n]
   (let [factor-base (nt/generate-primes-to n),
         trial-size (Math/ceil (/ (count factor-base) 2))
@@ -42,12 +62,24 @@
      :trial-base trial-base}))
 
 (defn filter-out-primes
+  "Any vectors smaller than 1 are either prime or the empty vector, so we drop
+  them and know that they occur once in our final calculation.
+
+  Input <- a sequence of integer vectors
+  Output -> a sequence of integer vectors with length greater than 1"
   [factorizations]
   (filter (fn [x]
             (> (count x) 1))
           factorizations))
 
 (defn find-maximum-exponent
+  "Given an integer value, base, and a sequence of maps that are k/v pairs of
+  base/# of times it appears in a prime factorization, returns the largest
+  time it appeared, the largest exponent of the base across all prime factorizations.
+
+  Input <- a sequence of maps of integer frequences and an integer base power to
+  search for the maximum of
+  Output -> an integer, the maximum exponent value for the given base"
   [frequencies base]
   (loop [maximum-exponent 0,
          freq-maps frequencies]
