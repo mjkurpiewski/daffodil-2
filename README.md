@@ -1,4 +1,4 @@
-# daffodil-2 v0.0.6
+# daffodil-2 v0.0.7
 
 A collection of programs, written in Clojure, designed to efficiently find solutions to
 Project Euler exercises. The current version number (i.e. 0.0.3) reflects the problem that
