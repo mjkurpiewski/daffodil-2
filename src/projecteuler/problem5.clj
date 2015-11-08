@@ -95,10 +95,25 @@
              (rest freq-maps)))))
 
 (defn assemble-exponent-vector
+  "Given our map of exponent frequencies and our factor base, we obtain a vector
+  of exponents in which each exponent value is the maximum that occurs across
+  all of our prime factorizations.
+
+  Input <- frequencies, a sequence of exponent frequency maps and
+           factor-base, a vector of integers
+  Output -> a vector of the maximum exponent values across the
+            factor base"
   [frequencies factor-base]
   (map (partial find-maximum-exponent frequencies) factor-base))
 
 (defn power-map
+  "Given a vector of bases and a vector of exponents, raises each element of
+  factor-base to its corresponding value in exponents. Returns a sequence of
+  integer values that result from the exponentiation.
+
+  Input <- exponents, a vector of integer values and
+           factor-base, a vector of integer values
+  Output -> a sequence of integer values"
   [exponents factor-base]
   (map (partial math/expt) factor-base exponents))
 
