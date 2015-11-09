@@ -1,4 +1,4 @@
-# daffodil-2 v0.0.7
+# daffodil-2 v0.0.9
 
 A collection of programs, written in Clojure, designed to efficiently find solutions to
 Project Euler exercises. The current version number (i.e. 0.0.3) reflects the problem that
@@ -8,11 +8,13 @@ versioning digit. (i.e. version 0.1.1 would reflect working on exercise 11.)
 ## Current status
 * Problem 1: Complete
 * Problem 2: Complete
-* Problem 3: "Just one more thing!" away from completion, see header comments in problem3.clj for a description of the project and its progress.
+* Problem 3: "Just one more thing!" away from completion, see header comments in problem3.clj for a description of the project and its progress
 * Problem 4: Complete
 * Problem 5: Complete
 * Problem 6: Complete
-* Problem 7: Pending
+* Problem 7: Solved/Partial Implementation
+* Problem 8: Complete
+* Problem 9: In progress
 
 ## Usage
 

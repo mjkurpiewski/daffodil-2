@@ -1,4 +1,4 @@
-(defproject projecteuler "0.0.7-SNAPSHOT"
+(defproject projecteuler "0.0.9-SNAPSHOT"
   :description "Project Euler exercise problem solvers written in Clojure."
   :url "http://orbistertius.xyz"
   :license {:name "Eclipse Public License"
