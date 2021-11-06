@@ -13,7 +13,7 @@
 ;; factor to our factorization of some number n. Insights into LU-decomposition,
 ;; whose functionality is provided by Incanter, has led me down a promising path
 ;; to finding a good solution in the very near future! Stay tuned. :)
-;; -pkurpiewski 10/16/2015
+;; -mjkurpiewski 10/16/2015
 
 (ns projecteuler.problem3
   (:require [clojure.set :as s])
